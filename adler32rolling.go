@@ -57,11 +57,11 @@ func (d *digest) Write(p []byte) (nn int, err error) {
 }
 
 // Add p to the running checksum d while removing r.
-func roll(d digest, blocksize uint32, in byte, out byte) digest {
+func roll(d digest, blocksize uint32, del byte, add byte) digest {
 	s1, s2 := uint32(d&0xffff), uint32(d>>16)
 
-	i := uint32(in)
-	o := uint32(out)
+	addi := uint32(add)
+	deli := uint32(del)
 
 	/*
 		s1 -= o
@@ -71,8 +71,8 @@ func roll(d digest, blocksize uint32, in byte, out byte) digest {
 		s2 += s1
 	*/
 
-	s1 += i - o
-	s2 += s1 - blocksize*o
+	s1 += addi - deli
+	s2 += s1 - blocksize*deli
 
 	s1 %= mod
 	s2 %= mod
@@ -80,8 +80,8 @@ func roll(d digest, blocksize uint32, in byte, out byte) digest {
 	return digest(s2<<16 | s1)
 }
 
-func (d *digest) Roll(blocksize uint32, p byte, r byte) {
-	*d = roll(*d, blocksize, p, r)
+func (d *digest) Roll(blocksize uint32, del byte, add byte) {
+	*d = roll(*d, blocksize, del, add)
 }
 
 func (d *digest) Sum32() uint32 { return uint32(*d) }
